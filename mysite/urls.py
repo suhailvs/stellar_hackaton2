@@ -18,9 +18,9 @@ from django.contrib import admin
 from django.urls import path
 from myapp import views # import ajax_views
 urlpatterns = [
-    path('',views.home),
+
     path('admin/', admin.site.urls),
-    path("ajax/", views.ajax_views, name="ajax_views"), # no payment
+    path('',views.home),
     path("stream_payments/", views.stream_payments),
-    path("get_promptresult/<memo>/", views.get_promptresult),
+    path("ajax_payment_status/<memo>/", views.get_promptresult),
 ]
