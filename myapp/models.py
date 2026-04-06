@@ -11,6 +11,8 @@ class Invoice(models.Model):
     xlm_amount    = models.DecimalField(max_digits=20, decimal_places=7)
     stellar_address = models.CharField(max_length=60)
     prompt        = models.TextField(blank=True)
+    result_text   = models.TextField(blank=True, default="")
+    processed_at  = models.DateTimeField(null=True, blank=True)
     
     status        = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     created_at    = models.DateTimeField(auto_now_add=True)

@@ -1,10 +1,13 @@
 import qrcode
+from decimal import Decimal, InvalidOperation
 from openai import OpenAI
 from stellar_sdk import Server
 
 from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.utils import timezone
+from django.db import transaction
 from .models import Invoice
 
 def home(request):
@@ -34,10 +37,20 @@ def stream_payments(request):
             tx = server.transactions().transaction(tx_hash).call()
             memo = tx["memo"]
             print("Payment received:", amount, tx_hash, memo)
+            if not str(memo).isdigit():
+                continue
+            if payment.get("to") != settings.STELLAR_ADDRESS:
+                continue
+            try:
+                payment_amount = Decimal(amount)
+            except InvalidOperation:
+                continue
+
             invoice = Invoice.objects.select_for_update().get(id=memo)# activate service
             
             if invoice.status == "pending":
-                # if amount<invoice.xlm_amount:continue
+                if payment_amount < invoice.xlm_amount:
+                    continue
                 invoice.tx_hash = tx_hash
                 invoice.status = 'paid'
                 invoice.save()
@@ -45,8 +58,14 @@ def stream_payments(request):
     return JsonResponse({"status_updated": invoices})
 
 def get_promptresult(request, memo):
-    invoice = Invoice.objects.get(id=memo)
-    if invoice.status == 'paid':
+    with transaction.atomic():
+        invoice = Invoice.objects.select_for_update().get(id=memo)
+        if invoice.status != 'paid':
+            return JsonResponse({'status':'not_paid'})
+
+        if invoice.result_text:
+            return JsonResponse({'status':'paid','data':invoice.result_text})
+
         client = OpenAI(
             base_url="https://models.inference.ai.azure.com",
             api_key=settings.GITHUB_TOKEN,
@@ -62,5 +81,7 @@ def get_promptresult(request, memo):
             max_tokens=1000,
             top_p=1.0,
         )
-        return JsonResponse({'status':'paid','data':response.choices[0].message.content})
-    return JsonResponse({'status':'not_paid'})
+        invoice.result_text = response.choices[0].message.content
+        invoice.processed_at = timezone.now()
+        invoice.save(update_fields=["result_text", "processed_at"])
+        return JsonResponse({'status':'paid','data':invoice.result_text})

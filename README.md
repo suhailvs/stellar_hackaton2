@@ -1,3 +1,7 @@
+## Stellar Agent
+
+https://dorahacks.io/hackathon/stellar-agents-x402-stripe-mpp/detail
+
 1. Basic Architecture
     1. when user enter a prompt
     2. website shows my stellar address
@@ -33,3 +37,28 @@ for payment in payments.stream():
     3. show QR code
     4. watch payment
     5. activate service
+
+## x402 Integration (Conceptual)
+
+This project does not currently implement x402. If you want to add it, here is a high-level way it would integrate with the existing invoice flow.
+
+1. Add a payment challenge endpoint
+    1. Client requests a protected resource (prompt result)
+    2. Server responds with a 402-style payment challenge and a payment request payload
+2. Reuse the existing invoice model
+    1. Create an `Invoice` when the challenge is issued
+    2. Use the invoice `id` as the memo
+3. Client completes payment on Stellar
+    1. Send XLM to `settings.STELLAR_ADDRESS`
+    2. Include the memo from the challenge
+4. Server verifies payment
+    1. Stream or query Horizon for the transaction
+    2. Validate destination, memo, asset, and amount
+    3. Mark invoice as paid and store `tx_hash`
+5. Fulfill the request once
+    1. Generate the response and store it in `Invoice.result_text`
+    2. Return the cached result on future calls
+
+Notes:
+1. The existing `get_promptresult` endpoint already supports idempotent fulfillment if you cache `result_text`.
+2. The existing `stream_payments` function can serve as the verification layer for x402.
