@@ -16,7 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-
+from myapp import views # import ajax_views
 urlpatterns = [
+    path('',views.home),
     path('admin/', admin.site.urls),
+    path("ajax/<str:purpose>/", views.ajax_views, name="ajax_views"),
 ]

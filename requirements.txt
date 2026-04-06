@@ -1,6 +1,9 @@
 stellar_sdk
 django
-#pycountry
-#pillow
 django-crispy-forms==2.5
 crispy-bootstrap5==2025.6
+
+setuptools
+python-decouple==3.4
+requests==2.32.3
+openai==1.58.1
