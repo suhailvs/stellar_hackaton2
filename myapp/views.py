@@ -3,7 +3,7 @@ from openai import OpenAI
 from stellar_sdk import Server
 
 from django.conf import settings
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import render
 from .models import Invoice
 
@@ -16,15 +16,6 @@ def home(request):
             xlm_amount=0.01, # XLM service price
             prompt=request.POST['prompt'],
         )
-        # uri = (
-        #     f"web+stellar:pay?"
-        #     f"destination={invoice.stellar_address}"
-        #     f"&amount={invoice.xlm_amount}"
-        #     f"&memo={invoice.id}"
-        #     f"&memo_type=MEMO_ID"
-        #     f"&asset_code=XLM"
-        # )
-
         img = qrcode.make(invoice.stellar_address)
         qrfolder = settings.BASE_DIR / 'myapp' / 'static' / 'qrcodes'
         img.save(qrfolder/f"{invoice.id}.png")
@@ -56,8 +47,6 @@ def stream_payments(request):
 def get_promptresult(request, memo):
     invoice = Invoice.objects.get(id=memo)
     if invoice.status == 'paid':
-        # sample_prompt = "Create an offering description for local exchange trading system 
-        # where I can offer activity or things like personal transportation using bike ct 100"
         client = OpenAI(
             base_url="https://models.inference.ai.azure.com",
             api_key=settings.GITHUB_TOKEN,
