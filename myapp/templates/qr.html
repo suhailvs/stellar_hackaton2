@@ -1,0 +1,14 @@
+
+{% extends 'base.html' %}
+{% load static %}
+{% block body %}
+<div class="card">
+<div class="card-body">
+    <p>Please send exact amount with given memo to the address</p>
+    <p class="lead">Memo:{{invoice.id}}</p>
+    <p class="lead">Address:{{invoice.stellar_address}}</p>
+    <p class="lead">XLM Amount:{{invoice.xlm_amount}}</p>
+    <img src="/static/qrcodes/{{invoice.id}}.png" class="img-thumbnail" />
+</div>
+</div>
+{% endblock %}

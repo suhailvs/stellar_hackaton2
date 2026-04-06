@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block body %}
+<div class="card">
+<div class="card-body">
+    <form method="post" novalidate>{% csrf_token %}
+        <textarea name="prompt" class="form-control"></textarea>
+        <button type="submit" class="btn btn-primary">Send</button>
+    </form>
+</div>
+</div>
+{% endblock %}

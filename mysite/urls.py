@@ -20,5 +20,7 @@ from myapp import views # import ajax_views
 urlpatterns = [
     path('',views.home),
     path('admin/', admin.site.urls),
-    path("ajax/<str:purpose>/", views.ajax_views, name="ajax_views"),
+    path("ajax/", views.ajax_views, name="ajax_views"), # no payment
+    path("stream_payments/", views.stream_payments),
+    path("get_promptresult/<memo>/", views.get_promptresult),
 ]
