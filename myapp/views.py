@@ -1,14 +1,13 @@
 import qrcode
-from decimal import Decimal, InvalidOperation
 from openai import OpenAI
-from stellar_sdk import Server
 
+from django.core.cache import cache
 from django.conf import settings
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
-from django.db import transaction
 from .models import Invoice
+from .tasks import stream_payments_watcher
 
 def home(request):
     if request.method=='POST':
@@ -25,71 +24,41 @@ def home(request):
         return render(request,'qr.html',{'invoice':invoice})
     return render(request,'prompt.html')
 
-# this must be run as async task using celery
-def stream_payments_fun():
-    server = Server(horizon_url="https://horizon-testnet.stellar.org") # Server("https://horizon.stellar.org")
-    payments = server.payments().for_account(settings.STELLAR_ADDRESS).cursor("now")    
-    for payment in payments.stream():
-        if payment["type"] != "payment":
-            continue
-        
-        amount = payment["amount"]
-        tx_hash = payment["transaction_hash"]
-        tx = server.transactions().transaction(tx_hash).call()
-        memo = tx["memo"]
-        print("Payment received:", amount, tx_hash, memo)
-        if not str(memo).isdigit():
-            continue
-        if payment.get("to") != settings.STELLAR_ADDRESS:
-            continue
-        try:
-            payment_amount = Decimal(amount)
-        except InvalidOperation:
-            continue
-        try:
-            with transaction.atomic():
-                invoice = Invoice.objects.select_for_update().get(id=memo)
-                if invoice.status == "pending":
-                    invoice.paid_amount = payment_amount
-                    invoice.tx_hash = tx_hash
-                    invoice.status = "paid"
-                    invoice.save()
-        except Invoice.DoesNotExist:
-            continue        
-
 def stream_payments(request):
-    # stream_payments_fun()
-    from .tasks import stream_payments_watcher
+    lock_key = "stream_payments_lock"
+    # cache.add returns True only if the key did not already exist
+    if not cache.add(lock_key, "1", timeout=60):
+        return JsonResponse({"status": "already_running"}, status=202)
     stream_payments_watcher.delay()
     return JsonResponse({"status_updated": 'true'})
 
 def get_promptresult(request, memo):
-    with transaction.atomic():
-        invoice = Invoice.objects.select_for_update().get(id=memo)
-        if invoice.status != 'paid':
-            return JsonResponse({'status':'not_paid'})
+    
+    invoice = Invoice.objects.select_for_update().get(id=memo)
+    if invoice.status != 'paid':
+        return JsonResponse({'status':'not_paid'})
 
-        if invoice.result_text:
-            return JsonResponse({'status':'paid','data':invoice.result_text})
+    if invoice.result_text:
+        return JsonResponse({'status':'paid','data':invoice.result_text})
 
-        client = OpenAI(
-            base_url="https://models.inference.ai.azure.com",
-            api_key=settings.GITHUB_TOKEN,
-        )
-        system_msg = "You are a helpful assistant."
-        response = client.chat.completions.create(
-            messages=[
-                {"role": "system", "content": system_msg},
-                {"role": "user", "content": invoice.prompt},
-            ],
-            model="gpt-4o",
-            temperature=1.0,
-            max_tokens=1000,
-            top_p=1.0,
-        )
-        invoice.result_text = response.choices[0].message.content
-        invoice.processed_at = timezone.now()
-        invoice.save(update_fields=["result_text", "processed_at"])
-        return JsonResponse({'status':'paid','data':
-            {'prompt_result':invoice.result_text,'paid':invoice.paid_amount}
-        })
+    client = OpenAI(
+        base_url="https://models.inference.ai.azure.com",
+        api_key=settings.GITHUB_TOKEN,
+    )
+    system_msg = "You are a helpful assistant."
+    response = client.chat.completions.create(
+        messages=[
+            {"role": "system", "content": system_msg},
+            {"role": "user", "content": invoice.prompt},
+        ],
+        model="gpt-4o",
+        temperature=1.0,
+        max_tokens=1000,
+        top_p=1.0,
+    )
+    invoice.result_text = response.choices[0].message.content
+    invoice.processed_at = timezone.now()
+    invoice.save(update_fields=["result_text", "processed_at"])
+    return JsonResponse({'status':'paid','data':
+        {'prompt_result':invoice.result_text,'paid':invoice.paid_amount}
+    })
