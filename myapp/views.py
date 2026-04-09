@@ -26,36 +26,40 @@ def home(request):
     return render(request,'prompt.html')
 
 # this must be run as async task using celery
-def stream_payments(request):
+def stream_payments_fun():
     server = Server(horizon_url="https://horizon-testnet.stellar.org") # Server("https://horizon.stellar.org")
-    payments = server.payments().for_account(settings.STELLAR_ADDRESS).cursor("now")
-    invoices = []
+    payments = server.payments().for_account(settings.STELLAR_ADDRESS).cursor("now")    
     for payment in payments.stream():
-        if payment["type"] == "payment":
-            amount = payment["amount"]
-            tx_hash = payment["transaction_hash"]
-            tx = server.transactions().transaction(tx_hash).call()
-            memo = tx["memo"]
-            print("Payment received:", amount, tx_hash, memo)
-            if not str(memo).isdigit():
-                continue
-            if payment.get("to") != settings.STELLAR_ADDRESS:
-                continue
-            try:
-                payment_amount = Decimal(amount)
-            except InvalidOperation:
-                continue
+        if payment["type"] != "payment":
+            continue
+        
+        amount = payment["amount"]
+        tx_hash = payment["transaction_hash"]
+        tx = server.transactions().transaction(tx_hash).call()
+        memo = tx["memo"]
+        print("Payment received:", amount, tx_hash, memo)
+        if not str(memo).isdigit():
+            continue
+        if payment.get("to") != settings.STELLAR_ADDRESS:
+            continue
+        try:
+            payment_amount = Decimal(amount)
+        except InvalidOperation:
+            continue
+        try:
+            with transaction.atomic():
+                invoice = Invoice.objects.select_for_update().get(id=memo)
+                if invoice.status == "pending":
+                    invoice.paid_amount = payment_amount
+                    invoice.tx_hash = tx_hash
+                    invoice.status = "paid"
+                    invoice.save()
+        except Invoice.DoesNotExist:
+            continue        
 
-            invoice = Invoice.objects.select_for_update().get(id=memo)# activate service
-            
-            if invoice.status == "pending":
-                if payment_amount < invoice.xlm_amount:
-                    continue
-                invoice.tx_hash = tx_hash
-                invoice.status = 'paid'
-                invoice.save()
-            invoices.append({"status":invoice.status,'id':invoice.id})
-    return JsonResponse({"status_updated": invoices})
+def stream_payments(request):
+    stream_payments_fun()
+    return JsonResponse({"status_updated": 'true'})
 
 def get_promptresult(request, memo):
     with transaction.atomic():
@@ -84,4 +88,6 @@ def get_promptresult(request, memo):
         invoice.result_text = response.choices[0].message.content
         invoice.processed_at = timezone.now()
         invoice.save(update_fields=["result_text", "processed_at"])
-        return JsonResponse({'status':'paid','data':invoice.result_text})
+        return JsonResponse({'status':'paid','data':
+            {'prompt_result':invoice.result_text,'paid':invoice.paid_amount}
+        })

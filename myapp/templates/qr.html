@@ -98,7 +98,7 @@
             typedInstance = null;
           }
 
-          const renderedHtml = mdConverter.makeHtml(data.data || "");
+          const renderedHtml = mdConverter.makeHtml(data.data.prompt_result || "");
           const options = {
             strings: [renderedHtml],
             typeSpeed: 35,
