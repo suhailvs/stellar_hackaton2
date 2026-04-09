@@ -14,3 +14,11 @@ https://dorahacks.io/hackathon/stellar-agents-x402-stripe-mpp/detail
     2. ✔ correct memo
     3. ✔ correct asset (XLM)
     4. ✔ payment not processed before
+
+### start watcher
+
+```
+$ sudo apt install redis-server
+$ celery -A mysite worker -l INFO
+```
+visit http://localhost:8000/stream_payments/ to start the celery task

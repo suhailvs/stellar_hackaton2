@@ -2,7 +2,7 @@ stellar_sdk
 qrcode 
 pillow
 django
-
+celery[redis]
 setuptools
 python-decouple==3.4
 requests==2.32.3

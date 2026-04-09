@@ -58,7 +58,9 @@ def stream_payments_fun():
             continue        
 
 def stream_payments(request):
-    stream_payments_fun()
+    # stream_payments_fun()
+    from .tasks import stream_payments_watcher
+    stream_payments_watcher.delay()
     return JsonResponse({"status_updated": 'true'})
 
 def get_promptresult(request, memo):
