@@ -19,7 +19,7 @@ def home(request):
             prompt=request.POST['prompt'],
         )
         img = qrcode.make(invoice.stellar_address)
-        qrfolder = settings.BASE_DIR / 'myapp' / 'static' / 'qrcodes'
+        qrfolder = settings.BASE_DIR / "mysite" / "media" / 'qrcodes'
         img.save(qrfolder/f"{invoice.id}.png")
         return render(request,'qr.html',{'invoice':invoice})
     return render(request,'prompt.html')
