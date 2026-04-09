@@ -21,6 +21,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -66,6 +67,7 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 # custom
+STATIC_ROOT = BASE_DIR / "staticfiles"
 GITHUB_TOKEN = config("GITHUB_TOKEN")
 STELLAR_ADDRESS = "GBYQNMJYBCTLYOWPKYP3W3M6FP2H34N55HYYN2MB4NC5F6PLO5IWQH3E"
 CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
