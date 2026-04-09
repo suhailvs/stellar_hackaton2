@@ -2,54 +2,50 @@
 {% load static %} 
 
 {% block body %}
-<div class="row justify-content-center">
-  <div class="col-lg-10 col-xl-9">
-    <div class="card shadow-sm">
-      <div class="card-body p-4 p-lg-5">
-        <div class="d-flex align-items-center justify-content-between flex-wrap mb-3">
-          <div>
-            <h2 class="h4 mb-1">Complete Your Stellar Payment</h2>
-            <p class="text-muted mb-0">Send the exact amount with the memo below to unlock your result.</p>
-          </div>
-          <span id="status_badge" class="badge bg-warning text-dark mt-2 mt-sm-0">Waiting for payment</span>
-        </div>
+<div class="card shadow-sm">
+  <div class="card-body p-4 p-lg-5">
+    <div class="d-flex align-items-center justify-content-between flex-wrap mb-3">
+      <div>
+        <h2 class="h4 mb-1">Complete Your Stellar Payment</h2>
+        <p class="text-muted mb-0">Send the exact amount with the memo below to unlock your result.</p>
+      </div>
+      <span id="status_badge" class="badge bg-warning text-dark mt-2 mt-sm-0">Waiting for payment</span>
+    </div>
 
-        <div id="id_qrcode" class="row g-4 align-items-center">
-          <div class="col-lg-7">
-            <div class="border rounded-3 p-3 p-md-4 bg-light">
-              <div class="mb-3">
-                <div class="text-uppercase small text-muted">Memo</div>
-                <div class="fw-semibold">{{ invoice.id }}</div>
-              </div>
-              <div class="mb-3">
-                <div class="text-uppercase small text-muted">Address</div>
-                <div class="text-break fw-semibold">{{ invoice.stellar_address }}</div>
-              </div>
-              <div class="mb-0">
-                <div class="text-uppercase small text-muted">Amount (XLM)</div>
-                <div class="display-6 fw-bold mb-0">{{ invoice.xlm_amount }}</div>
-              </div>
-            </div>
-            <div class="mt-3 d-flex align-items-center text-muted small">
-              <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-              Checking payment status
-            </div>
+    <div id="id_qrcode" class="row g-4 align-items-center">
+      <div class="col-lg-7">
+        <div class="border rounded-3 p-3 p-md-4 bg-light">
+          <div class="mb-3">
+            <div class="text-uppercase small text-muted">Memo</div>
+            <div class="fw-semibold">{{ invoice.id }}</div>
           </div>
-          <div class="col-lg-5 text-center">
-            <div class="border rounded-3 p-3 bg-white">
-              <img src="/static/qrcodes/{{invoice.id}}.png" class="img-fluid" alt="Payment QR Code" />
-            </div>
-            <div class="mt-2 small text-muted">Scan with any Stellar-compatible wallet.</div>
+          <div class="mb-3">
+            <div class="text-uppercase small text-muted">Address</div>
+            <div class="text-break fw-semibold">{{ invoice.stellar_address }}</div>
+          </div>
+          <div class="mb-0">
+            <div class="text-uppercase small text-muted">Amount (XLM)</div>
+            <div class="display-6 fw-bold mb-0">{{ invoice.xlm_amount }}</div>
           </div>
         </div>
-
-        <div id="result_wrap" class="mt-4 d-none">
-          <div class="alert alert-success mb-3" role="alert">
-            Payment confirmed. Generating your response.
-          </div>
-          <div id="id_detail" class="border rounded-3 p-3 p-md-4 bg-light" aria-live="polite"></div>
+        <div class="mt-3 d-flex align-items-center text-muted small">
+          <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          Checking payment status
         </div>
       </div>
+      <div class="col-lg-5 text-center">
+        <div class="border rounded-3 p-3 bg-white">
+          <img src="/static/qrcodes/{{invoice.id}}.png" class="img-fluid" alt="Payment QR Code" />
+        </div>
+        <div class="mt-2 small text-muted">Scan with any Stellar-compatible wallet.</div>
+      </div>
+    </div>
+
+    <div id="result_wrap" class="mt-4 d-none">
+      <div class="alert alert-success mb-3" role="alert">
+        Payment confirmed. Generating your response.
+      </div>
+      <div id="id_detail" class="border rounded-3 p-3 p-md-4 bg-light" aria-live="polite"></div>
     </div>
   </div>
 </div>
