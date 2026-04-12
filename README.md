@@ -15,3 +15,9 @@ youtube: https://www.youtube.com/watch?v=dac5htyIEk8
     2. ✔ correct memo
     3. ✔ correct asset (XLM)
     4. ✔ payment not processed before
+
+### Run locally
+
+```bash
+
+```

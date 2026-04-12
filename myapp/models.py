@@ -17,3 +17,6 @@ class Invoice(models.Model):
     status        = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     created_at    = models.DateTimeField(auto_now_add=True)
 
+class Error(models.Model):
+    text = models.TextField()
+    created_at    = models.DateTimeField(auto_now_add=True)
