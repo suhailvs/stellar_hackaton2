@@ -16,3 +16,4 @@ class Invoice(models.Model):
     paid_amount   = models.DecimalField(max_digits=20, decimal_places=7, blank=True, null=True)
     status        = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     created_at    = models.DateTimeField(auto_now_add=True)
+
