@@ -7,6 +7,6 @@ from myapp import views
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", views.home),
-    path("stream_payments/", views.stream_payments),
-    path("ajax_payment_status/<memo>/", views.get_promptresult),
+    # path("stream_payments/", views.stream_payments),
+    path("<memo>/", views.get_promptresult),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

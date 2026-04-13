@@ -78,7 +78,7 @@
     if (paidShown || inFlight) return;
     inFlight = true;
 
-    $.get("/ajax_payment_status/" + invoiceId + "/")
+    $.get("/" + invoiceId + "/")
       .done(function (data) {
         if (data.status === "paid" && !paidShown) {
           paidShown = true;
