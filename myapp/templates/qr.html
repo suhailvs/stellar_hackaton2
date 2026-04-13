@@ -88,7 +88,7 @@
             .removeClass("bg-warning text-dark")
             .addClass("bg-success")
             .text(`Payment received. ${data.data.paid_amount_msg}`);
-
+          $(".h4").addClass("d-none");
           $("#id_qrcode").addClass("d-none");
           $("#result_wrap").removeClass("d-none");
 
