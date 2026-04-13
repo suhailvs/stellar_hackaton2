@@ -30,6 +30,23 @@ stdout_logfile=/var/log/celery_worker.log
 stderr_logfile=/var/log/celery_worker_error.log
 autostart=true
 autorestart=true
+
+
+[program:stellar_payment_watcher]
+command=/var/www/stellar_hackaton2/env/bin/python manage.py watch_payments
+directory=/var/www/stellar_hackaton2
+user=www-data
+autostart=true
+autorestart=true
+startretries=999
+startsecs=5
+
+stdout_logfile=/var/log/supervisor/stellar_payment_watcher.stdout.log
+stderr_logfile=/var/log/supervisor/stellar_payment_watcher.stderr.log
+stdout_logfile_maxbytes=10MB
+stdout_logfile_backups=5
+stderr_logfile_maxbytes=10MB
+stderr_logfile_backups=5
 ```
 
 sudo supervisorctl reread
