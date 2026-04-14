@@ -97,7 +97,7 @@
           $("#payment_title").addClass("d-none");
           $("#id_qrcode").addClass("d-none");
           $("#result_wrap").removeClass("d-none");
-          $(".alert").html(`Payment confirmed. Paid amount: ${data.data.paid_amount}. See <a href="https://stellar.expert/explorer/testnet/tx/${data.data.txn_hash}">transaction</a> on blockchain. Generating your response.`);
+          $(".alert").html(`Payment confirmed. Paid amount: ${data.data.paid_amount}. See <a href="https://stellar.expert/explorer/testnet/tx/${data.data.txn_hash}" target="_blank" rel="noopener noreferrer">transaction</a> on blockchain. Generating your response.`);
           if (typedInstance) {
             typedInstance.destroy();
             typedInstance = null;
