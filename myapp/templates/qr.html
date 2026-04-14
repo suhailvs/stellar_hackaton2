@@ -2,13 +2,14 @@
 {% load static %} 
 
 {% block body %}
-<div class="card shadow-sm">
+<div class="card app-card">
   <div class="card-body p-4 p-lg-5">
-    <div class="d-flex align-items-center justify-content-between flex-wrap mb-3">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
       <div>
+        <div class="text-uppercase small text-muted">Step 2</div>
         <div class="d-flex align-items-center gap-2 flex-wrap">
-          <h2 class="h4 mb-1">Complete Your Stellar Testnet Payment</h2>
-          <span class="badge bg-info text-dark">Stellar Testnet</span>
+          <h2 id="payment_title" class="h3 mb-1">Complete your Stellar testnet payment</h2>
+          
         </div>
         <p class="text-muted mb-0">Send the exact amount with the memo below to unlock your result.</p>
       </div>
@@ -17,10 +18,14 @@
 
     <div id="id_qrcode" class="row g-4 align-items-center">
       <div class="col-lg-7">
-        <div class="border rounded-3 p-3 p-md-4 bg-light">
+        <div class="border rounded-4 p-3 p-md-4 bg-white">
+          <div class="mb-3">
+            <div class="text-uppercase small text-muted">Network</div>
+            <div class="text-break fw-semibold">Testnet</div>
+          </div>
           <div class="mb-3">
             <div class="text-uppercase small text-muted">Memo</div>
-            <div class="fw-semibold">{{ invoice.id }}</div>
+            <div class="display-6 fw-bold">{{ invoice.id }}</div>
           </div>
           <div class="mb-3">
             <div class="text-uppercase small text-muted">Address</div>
@@ -28,7 +33,7 @@
           </div>
           <div class="mb-0">
             <div class="text-uppercase small text-muted">Amount (XLM)</div>
-            <div class="display-6 fw-bold mb-0">{{ invoice.xlm_amount }}</div>
+            <div class="display-6 fw-bold mb-0 text-success">{{ invoice.xlm_amount }}</div>
           </div>
         </div>
         <div class="mt-3 d-flex align-items-center text-muted small">
@@ -37,18 +42,19 @@
         </div>
       </div>
       <div class="col-lg-5 text-center">
-        <div class="border rounded-3 p-3 bg-white">
+        <div class="border rounded-4 p-3 bg-white">
           <img src="/media/qrcodes/{{invoice.id}}.png" class="img-fluid" alt="Payment QR Code" />
+        </div>
+        <div class="mt-3">
+          <div class="text-break fw-semibold">{{ invoice.stellar_address }}</div>
         </div>
         <div class="mt-2 small text-muted">Scan with any Stellar-compatible wallet.</div>
       </div>
     </div>
 
     <div id="result_wrap" class="mt-4 d-none">
-      <div class="alert alert-success mb-3" role="alert">
-        Payment confirmed. Generating your response.
-      </div>
-      <div id="id_detail" class="border rounded-3 p-3 p-md-4 bg-light" aria-live="polite"></div>
+      <div class="alert alert-success mb-3" role="alert"></div>
+      <div id="id_detail" class="border rounded-4 p-3 p-md-4 bg-light" aria-live="polite"></div>
     </div>
   </div>
 </div>
@@ -88,10 +94,10 @@
             .removeClass("bg-warning text-dark")
             .addClass("bg-success")
             .text(`Payment received. ${data.data.paid_amount_msg}`);
-          $(".h4").addClass("d-none");
+          $("#payment_title").addClass("d-none");
           $("#id_qrcode").addClass("d-none");
           $("#result_wrap").removeClass("d-none");
-
+          $(".alert").html(`Payment confirmed. Paid amount: ${data.data.paid_amount}. See <a href="https://stellar.expert/explorer/testnet/tx/${data.data.txn_hash}">transaction</a> on blockchain. Generating your response.`);
           if (typedInstance) {
             typedInstance.destroy();
             typedInstance = null;

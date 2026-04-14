@@ -61,5 +61,6 @@ def get_promptresult(request, memo):
     invoice.save(update_fields=["result_text", "processed_at"])
     paid_amount_msg = 'High' if invoice.paid_amount>=invoice.xlm_amount else 'You paid low amount. I am still showing the result'
     return JsonResponse({'status':'paid','data':
-        {'prompt_result':invoice.result_text,'paid_amount_msg':paid_amount_msg}
+        {'prompt_result':invoice.result_text,'paid_amount_msg':paid_amount_msg,
+         'txn_hash':invoice.tx_hash,'paid_amount':invoice.paid_amount}
     })
